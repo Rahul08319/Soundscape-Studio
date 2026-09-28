@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base, components, game-skin;
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -54,6 +55,199 @@ All colors MUST be HSL.
     --glow-primary: 0 0 20px hsl(280 85% 65% / 0.5);
     --glow-secondary: 0 0 20px hsl(190 85% 55% / 0.5);
     --glow-accent: 0 0 20px hsl(330 85% 60% / 0.5);
+  }
+}
+
+@layer game-skin {
+  .studio-shell { min-height: 100svh; padding: clamp(.35rem, 2vw, 1.5rem); background: radial-gradient(ellipse at 50% -18%, hsl(272 92% 66% / .17), transparent 42rem), radial-gradient(ellipse at 3% 62%, hsl(190 96% 60% / .1), transparent 27rem), hsl(232 39% 3%); }
+  .studio-frame { max-width: 1260px; border-color: hsl(0 0% 100% / .1); border-radius: 1.5rem; background: linear-gradient(155deg, hsl(232 36% 8% / .98), hsl(232 39% 4% / .98) 58%); }
+  .studio-console { grid-template-columns: auto minmax(230px, .95fr) minmax(340px, 1.25fr); background: linear-gradient(90deg, hsl(232 35% 7%), hsl(236 38% 8%)); }
+  .studio-play { min-width: 8.2rem; height: 3.3rem; border-radius: .9rem; box-shadow: 0 5px 22px hsl(272 92% 66% / .3); }
+  .preset-strip { background: hsl(232 34% 6%); }
+  .preset-chip, .mixer-grid { border-radius: 1rem; overflow: hidden; }
+  .step-grid { gap: .42rem; }
+  .step-cell { min-height: 1.85rem; border-radius: .55rem; background: color-mix(in srgb, var(--track) 7%, hsl(232 30% 9%)); box-shadow: inset 0 1px hsl(0 0% 100% / .035); }
+  .step-cell.is-active { border-radius: .65rem; box-shadow: 0 0 16px color-mix(in srgb, var(--track) 45%, transparent), inset 0 1px hsl(0 0% 100% / .45); }
+  .step-cell.is-current { outline-color: hsl(190 96% 75%); box-shadow: 0 0 14px hsl(190 96% 60% / .38); }
+  .mixer-surface { background: hsl(232 37% 5%); }
+  .mix-channel { background: linear-gradient(180deg, color-mix(in srgb, var(--track) 11%, hsl(232 34% 8%)), hsl(232 36% 6%) 62%); }
+  @media (max-width: 900px) { .studio-console { grid-template-columns: auto minmax(0, 1fr); } }
+  @media (max-width: 640px) {
+    .studio-console { grid-template-columns: 1fr; }
+    .step-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+}
+
+@layer components {
+  .studio-shell {
+    min-height: 100svh;
+    padding: clamp(.5rem, 2vw, 1.5rem);
+    background:
+      radial-gradient(ellipse at 50% -18%, hsl(272 92% 66% / .17), transparent 42rem),
+      radial-gradient(ellipse at 3% 62%, hsl(190 96% 60% / .1), transparent 27rem),
+      hsl(232 39% 3%);
+  }
+
+  .studio-frame {
+    max-width: 1260px;
+    border-color: hsl(0 0% 100% / .1);
+    border-radius: 1.5rem;
+    background: linear-gradient(155deg, hsl(232 36% 8% / .98), hsl(232 39% 4% / .98) 58%);
+    box-shadow: 0 24px 90px hsl(232 90% 1% / .7), inset 0 1px hsl(0 0% 100% / .07);
+  }
+
+  .game-hud {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem clamp(1rem, 2.5vw, 2rem);
+    border-bottom: 1px solid hsl(0 0% 100% / .08);
+    background: hsl(232 35% 5% / .72);
+  }
+
+  .game-brand, .game-hud-right { display: flex; align-items: center; gap: .8rem; }
+  .game-emblem {
+    width: 2.7rem;
+    height: 2.7rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid hsl(272 92% 66% / .45);
+    border-radius: 1rem;
+    background: radial-gradient(circle, hsl(272 92% 66% / .28), hsl(232 35% 8%));
+    color: hsl(190 96% 68%);
+    font-size: 1.7rem;
+    text-shadow: 0 0 20px hsl(190 96% 60% / .8);
+  }
+  .game-world-label { margin: 0 0 .15rem; color: hsl(215 20% 65%); font-size: .58rem; font-weight: 800; letter-spacing: .18em; }
+  .game-world-label span { color: hsl(272 92% 76%); }
+  .game-title { margin: 0; font-size: 1.15rem; font-weight: 900; letter-spacing: -.055em; line-height: 1; }
+  .game-title span { color: hsl(272 92% 72%); }
+  .game-level, .game-audio-toggle, .game-fullscreen {
+    min-height: 2.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    border: 1px solid hsl(0 0% 100% / .1);
+    border-radius: .8rem;
+    background: hsl(0 0% 100% / .035);
+    color: hsl(215 20% 77%);
+  }
+  .game-level { padding: 0 .7rem; font-size: .62rem; font-weight: 800; letter-spacing: .1em; }
+  .game-level b { color: hsl(190 96% 68%); font-size: .8rem; }
+  .game-level-dot, .game-live-status i { width: .42rem; height: .42rem; border-radius: 50%; background: hsl(145 80% 58%); box-shadow: 0 0 10px hsl(145 80% 58% / .8); }
+  .game-audio-toggle { padding: 0 .8rem; cursor: pointer; font-size: .6rem; font-weight: 800; letter-spacing: .1em; }
+  .game-audio-toggle svg { width: .95rem; height: .95rem; color: hsl(145 80% 62%); }
+  .game-audio-toggle.is-muted svg { color: hsl(0 85% 68%); }
+  .game-fullscreen { width: 2.4rem; cursor: pointer; font-size: 1.4rem; }
+  .game-audio-toggle:hover, .game-fullscreen:hover { border-color: hsl(272 92% 66% / .55); color: white; }
+
+  .game-stage {
+    position: relative;
+    min-height: 280px;
+    display: grid;
+    grid-template-columns: minmax(240px, .88fr) minmax(240px, 1.12fr);
+    align-items: center;
+    gap: 1rem;
+    overflow: hidden;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-bottom: 1px solid hsl(0 0% 100% / .08);
+    background:
+      radial-gradient(ellipse at 78% 48%, hsl(272 92% 66% / .13), transparent 19rem),
+      radial-gradient(ellipse at 55% 130%, hsl(190 96% 60% / .07), transparent 22rem),
+      linear-gradient(110deg, hsl(232 38% 7%), hsl(236 42% 5%) 58%, hsl(252 38% 8%));
+  }
+  .game-stage::before, .game-stage::after { content: ""; position: absolute; pointer-events: none; border: 1px solid hsl(0 0% 100% / .035); border-radius: 50%; }
+  .game-stage::before { width: 29rem; height: 29rem; right: 8%; top: -13rem; }
+  .game-stage::after { width: 38rem; height: 38rem; right: 2%; top: -17rem; }
+  .game-stage-copy { position: relative; z-index: 2; }
+  .game-stage-kicker { display: inline-flex; align-items: center; gap: .5rem; color: hsl(190 96% 69%); font-size: .59rem; font-weight: 900; letter-spacing: .16em; }
+  .game-stage-kicker i { width: .42rem; height: .42rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+  .game-stage-copy h2 { margin: .8rem 0 .5rem; max-width: 24rem; font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 800; letter-spacing: -.075em; line-height: .98; }
+  .game-stage-copy h2 em { color: hsl(272 92% 73%); font-style: normal; text-shadow: 0 0 28px hsl(272 92% 66% / .35); }
+  .game-stage-copy p { margin: 0; color: hsl(215 20% 70%); font-size: .85rem; }
+  .game-stage-visual { position: relative; z-index: 1; width: min(100%, 420px); aspect-ratio: 1.7; justify-self: end; display: grid; place-items: center; }
+  .game-stage-visual::before { content: ""; position: absolute; inset: 12%; border-radius: 50%; background: radial-gradient(circle, hsl(272 92% 66% / .2), hsl(190 96% 60% / .04) 48%, transparent 70%); filter: blur(8px); }
+  .game-stage-visual.is-playing::before { animation: garden-breathe 1.8s ease-in-out infinite alternate; }
+  .game-stage-visual .beat-visualizer { position: relative; z-index: 1; width: 78%; height: 100%; min-height: 190px; aspect-ratio: unset; overflow: visible; border: 0; border-radius: 50%; background: transparent; box-shadow: none; }
+  .game-stage-visual .beat-visualizer canvas { filter: drop-shadow(0 0 20px hsl(272 92% 66% / .3)); }
+  .game-stage-orbit { position: absolute; border: 1px solid hsl(190 96% 70% / .2); border-radius: 50%; transform: rotate(-18deg); }
+  .orbit-one { inset: 12% 4%; }
+  .orbit-two { inset: 5% 11%; border-color: hsl(272 92% 75% / .17); transform: rotate(35deg); }
+  .game-stage-footer { position: absolute; z-index: 2; right: clamp(1.25rem, 3vw, 2.5rem); bottom: .75rem; display: flex; gap: 1.1rem; color: hsl(215 20% 57%); font-size: .55rem; font-weight: 800; letter-spacing: .11em; }
+  .game-stage-footer b { color: hsl(210 40% 95%); }
+  .game-live-status { display: inline-flex; align-items: center; gap: .4rem; color: hsl(145 80% 65%); }
+
+  .studio-console { grid-template-columns: auto minmax(230px, .95fr) minmax(340px, 1.25fr); background: linear-gradient(90deg, hsl(232 35% 7%), hsl(236 38% 8%)); }
+  .studio-play { border-radius: .9rem; min-width: 8.2rem; height: 3.3rem; box-shadow: 0 5px 22px hsl(272 92% 66% / .3); }
+  .studio-actions button, .preset-strip button, .mix-actions button { border-radius: .65rem; }
+  .preset-strip { background: hsl(232 34% 6%); }
+  .preset-chip { border-radius: .7rem; }
+  .sequencer-surface { background: linear-gradient(180deg, hsl(232 37% 7% / .72), hsl(232 39% 5%)); }
+  .section-heading { margin-bottom: 1rem; }
+  .section-heading h2 { letter-spacing: -.045em; }
+  .track-lane { min-height: 3.8rem; }
+  .step-grid { gap: .42rem; }
+  .step-cell { min-height: 1.85rem; border-radius: .55rem; background: color-mix(in srgb, var(--track) 7%, hsl(232 30% 9%)); box-shadow: inset 0 1px hsl(0 0% 100% / .035); }
+  .step-cell.is-active { border-radius: .65rem; box-shadow: 0 0 16px color-mix(in srgb, var(--track) 45%, transparent), inset 0 1px hsl(0 0% 100% / .45); }
+  .step-cell.is-current { outline-color: hsl(190 96% 75%); box-shadow: 0 0 14px hsl(190 96% 60% / .38); }
+  .mixer-surface { background: hsl(232 37% 5%); }
+  .mixer-grid { border-radius: 1rem; overflow: hidden; }
+  .mix-channel { background: linear-gradient(180deg, color-mix(in srgb, var(--track) 11%, hsl(232 34% 8%)), hsl(232 36% 6%) 62%); }
+  .game-hint { padding: .7rem 1rem; border-top: 1px solid hsl(0 0% 100% / .06); color: hsl(215 20% 48%); text-align: center; font-size: .55rem; font-weight: 800; letter-spacing: .13em; }
+  .game-hint span { padding: 0 .45rem; color: hsl(272 92% 68%); }
+  @keyframes garden-breathe { from { transform: scale(.92); opacity: .55; } to { transform: scale(1.06); opacity: 1; } }
+
+  @media (max-width: 900px) {
+    .game-stage { min-height: 250px; }
+    .studio-console { grid-template-columns: auto minmax(0, 1fr); }
+    .studio-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  }
+  @media (min-width: 900px) and (max-height: 800px) {
+    .studio-shell { padding: .5rem; }
+    .game-hud { min-height: 58px; padding-block: .45rem; }
+    .game-emblem { width: 2.25rem; height: 2.25rem; }
+    .game-stage { min-height: 170px; padding-block: .8rem; }
+    .game-stage-copy h2 { margin: .5rem 0 .3rem; font-size: 2.25rem; }
+    .game-stage-copy p { font-size: .75rem; }
+    .game-stage-visual { max-height: 170px; }
+    .game-stage-visual .beat-visualizer { min-height: 150px; }
+    .studio-console { gap: .65rem; padding-block: .55rem; }
+    .studio-play { height: 2.7rem; }
+    .studio-parameters { gap: .8rem; }
+    .studio-parameters label { gap: .25rem; font-size: .57rem; }
+    .preset-strip { min-height: 3.25rem; padding-block: .4rem; }
+    .sequencer-surface { padding: 1rem 1.5rem; }
+    .section-heading { margin-bottom: .65rem; }
+    .track-lane { min-height: 2.75rem; }
+    .step-cell { min-height: 1.45rem; }
+    .game-hint { padding-block: .45rem; }
+  }
+  @media (max-width: 640px) {
+    .studio-shell { padding: .35rem; }
+    .studio-frame { border-radius: 1rem; }
+    .game-hud { min-height: 62px; padding: .55rem .7rem; }
+    .game-emblem { width: 2.25rem; height: 2.25rem; border-radius: .75rem; }
+    .game-level { display: none; }
+    .game-audio-toggle { min-height: 2.2rem; padding: 0 .55rem; }
+    .game-audio-toggle span { display: none; }
+    .game-fullscreen { width: 2.2rem; min-height: 2.2rem; }
+    .game-stage { min-height: 365px; grid-template-columns: 1fr; gap: 0; padding: 1.2rem 1rem 2rem; }
+    .game-stage-copy h2 { font-size: 2.2rem; }
+    .game-stage-visual { width: min(100%, 330px); justify-self: center; margin-top: -.4rem; }
+    .game-stage-visual .beat-visualizer { min-height: 190px; }
+    .game-stage-footer { right: 1rem; bottom: .6rem; left: 1rem; justify-content: space-between; gap: .4rem; font-size: .48rem; }
+    .studio-console { grid-template-columns: 1fr; }
+    .studio-parameters { gap: .9rem; }
+    .studio-actions { grid-column: auto; }
+    .preset-strip { align-items: flex-start; flex-direction: column; }
+    .preset-strip-content { width: 100%; }
+    .track-lane { grid-template-columns: 1fr; gap: .55rem; padding: .8rem 0; }
+    .track-label { display: flex; justify-content: space-between; }
+    .track-label small { margin: 0; }
+    .step-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   }
 }
 

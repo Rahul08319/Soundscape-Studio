@@ -15,3 +15,5 @@ Original prompt: Add all applicable YouTube Playables SDK requirements to the li
 2026-09-23: Reframed the studio with Apple-inspired calm hierarchy, glass depth, and a native WebGL visualizer that reacts to playback without a third-party rendering dependency. Rewrote the README to document the visualizer, creative tools, and Playables behavior. CI now runs the reliable production-build verification only.
 
 2026-09-25: Merged the visual studio update with the platform bridge, removed ad, rewarded-content, leaderboard, and score-submission paths, and verified the production bundle and local preview response.
+
+2026-09-27: Responded to the clarification that this project is a game, not a website. Reframed the first screen as a Sound Garden game HUD and playfield, removed the visible generic platform selector, kept Playables lifecycle support behind the game, and updated the README. Added `advanceTime` and richer `render_game_to_text` hooks for the web-game test client. Browser automation is currently blocked because the skill client cannot resolve its Playwright dependency and the in-app browser provider is unavailable.

@@ -1,7 +1,6 @@
 import { ChangeEvent, CSSProperties, useEffect, useRef, useState } from "react";
 import {
   FileDown,
-  Layers,
   Pause,
   Play,
   Save,
@@ -16,15 +15,8 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { BeatVisualizer } from "./BeatVisualizer";
-import { platformManager, SUPPORTED_PLATFORMS, type PlatformId } from "@/lib/platform";
+import { platformManager } from "@/lib/platform";
 
 const STEPS = 16;
 const MAX_PRESETS = 24;
@@ -182,8 +174,6 @@ export const BeatStudio = () => {
   const [detectedLang, setDetectedLang] = useState("en");
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedStep, setSelectedStep] = useState(0);
-  const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
-  const [activePlatformId, setActivePlatformId] = useState<PlatformId>(() => platformManager.currentId);
 
   const importRef = useRef<HTMLInputElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -196,7 +186,6 @@ export const BeatStudio = () => {
   const togglePlaybackRef = useRef<() => Promise<void>>(async () => undefined);
 
   const canEdit = isReady && !isSystemPaused;
-  const platformMeta = platformManager.currentMetadata;
 
   useEffect(() => {
     stateRef.current = { bpm, pattern, tracks, swing, velocity };
@@ -507,16 +496,44 @@ export const BeatStudio = () => {
   useEffect(() => {
     (window as Window & { render_game_to_text?: () => string }).render_game_to_text = () =>
       JSON.stringify({
-        mode: isPlaying ? "playing" : "editing",
-        platform: platformManager.currentId,
+        mode: isPlaying ? "playing" : "ready",
+        scene: "sound-garden",
         bpm,
         swing,
         velocity,
         currentStep,
         selectedStep,
+        activePads: pattern.reduce((total, row) => total + row.filter(Boolean).length, 0),
         tracks: tracks.map(({ name, muted, solo, volume }) => ({ name, muted, solo, volume })),
       });
-  }, [bpm, currentStep, isPlaying, selectedStep, swing, tracks, velocity]);
+  }, [bpm, currentStep, isPlaying, pattern, selectedStep, swing, tracks, velocity]);
+
+  useEffect(() => {
+    const testWindow = window as Window & { advanceTime?: (ms: number) => void };
+    testWindow.advanceTime = (ms) => {
+      if (!isPlayingRef.current || ms <= 0) return;
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+
+      const current = stateRef.current;
+      let elapsed = 0;
+      let step = currentStepRef.current;
+      let iterations = 0;
+      while (elapsed < ms && iterations < 256) {
+        step = (step + 1) % STEPS;
+        current.pattern.forEach((row, trackIndex) => {
+          if (row[step]) playSound(trackIndex);
+        });
+        const duration = (60 / current.bpm / 4) * 1000;
+        elapsed += duration * (step % 2 === 0 ? 1 - current.swing / 200 : 1 + current.swing / 200);
+        iterations += 1;
+      }
+
+      currentStepRef.current = step;
+      setCurrentStep(step);
+      scheduleNextStep();
+    };
+    return () => { delete testWindow.advanceTime; };
+  }, [isAudioEnabled]);
 
   const toggleBeat = (trackIndex: number, stepIndex: number) => {
     if (!canEdit) return;
@@ -541,12 +558,6 @@ export const BeatStudio = () => {
       )
     );
     toast.success("New soundscape groove generated");
-  };
-
-  const handleSelectPlatform = async (id: PlatformId) => {
-    setActivePlatformId(id);
-    await platformManager.switchPlatform(id);
-    toast.success(`Active platform switched to ${platformManager.currentMetadata.name}`);
   };
 
   const savePreset = () => {
@@ -615,49 +626,52 @@ export const BeatStudio = () => {
   return (
     <main className="studio-shell">
       <div className="studio-frame">
-        {/* Apple Design Fluid Header */}
-        <header className="apple-header">
-          <div>
-            <div className="flex items-center gap-3">
-              <p className="studio-kicker">SPATIAL SOUNDSCAPE</p>
-              <button
-                type="button"
-                className="apple-pill"
-                onClick={() => setPlatformDialogOpen(true)}
-                title="Select Gaming Platform Engine"
-              >
-                <Layers className="w-3.5 h-3.5 text-sky-400" />
-                <span>{platformMeta.name}</span>
-                <span className="status-dot is-live" />
-              </button>
+        <header className="game-hud">
+          <div className="game-brand">
+            <span className="game-emblem" aria-hidden="true">◉</span>
+            <div>
+              <p className="game-world-label">SOUND GARDEN <span>· WORLD 01</span></p>
+              <h1 className="game-title">BEAT <span>STUDIO</span></h1>
             </div>
-            <h1 className="studio-wordmark">
-              BEAT <span>STUDIO</span>
-            </h1>
           </div>
-
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2">
-              {/* Interactive Master Mute/Unmute Speaker */}
-              <button
-                type="button"
-                className={`apple-pill ${!isAudioEnabled ? "text-red-400 border-red-500/40" : ""}`}
-                onClick={() => setIsAudioEnabled((prev) => !prev)}
-                title={isAudioEnabled ? "Mute Master Audio" : "Unmute Master Audio"}
-              >
-                {isAudioEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5" />}
-                <span>{isAudioEnabled ? "Audio On" : "Muted"}</span>
-              </button>
-
-            </div>
-            <p className="studio-shortcuts">Space play · M mute · ←/→ step · 1–8 toggle · F fullscreen</p>
+          <div className="game-hud-right">
+            <div className="game-level"><span className="game-level-dot" /> LOOP <b>01</b></div>
+            <button
+              type="button"
+              className={`game-audio-toggle ${!isAudioEnabled ? "is-muted" : ""}`}
+              onClick={() => setIsAudioEnabled((prev) => !prev)}
+              title={isAudioEnabled ? "Mute game audio" : "Enable game audio"}
+            >
+              {isAudioEnabled ? <Volume2 /> : <VolumeX />}
+              <span>{isAudioEnabled ? "SOUND ON" : "MUTED"}</span>
+            </button>
+            <button
+              type="button"
+              className="game-fullscreen"
+              onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen())}
+              aria-label="Toggle fullscreen"
+              title="Fullscreen (F)"
+            >⛶</button>
           </div>
         </header>
 
-        {/* Real-time Apple Fluid Visualizer */}
-        <div className="px-6 py-2 bg-black/20">
-          <BeatVisualizer isPlaying={isPlaying} currentStep={currentStep} velocity={velocity} />
-        </div>
+        <section className="game-stage" aria-label="Sound Garden playfield">
+          <div className="game-stage-copy">
+            <span className="game-stage-kicker"><i /> {isPlaying ? "GROOVE IN MOTION" : "YOUR GROOVE AWAITS"}</span>
+            <h2>Make the garden <em>move.</em></h2>
+            <p>Tap a sound pad. Build a loop. Feel it come alive.</p>
+          </div>
+          <div className={`game-stage-visual ${isPlaying ? "is-playing" : ""}`}>
+            <BeatVisualizer isPlaying={isPlaying} currentStep={currentStep} velocity={velocity} />
+            <span className="game-stage-orbit orbit-one" />
+            <span className="game-stage-orbit orbit-two" />
+          </div>
+          <div className="game-stage-footer">
+            <span><b>16</b> BEAT PADS</span>
+            <span><b>{bpm}</b> BPM</span>
+            <span className="game-live-status"><i /> {isPlaying ? "PLAYING" : "READY"}</span>
+          </div>
+        </section>
 
         {/* Playback & Parameters Bar */}
         <section className="studio-console" aria-label="Playback controls">
@@ -797,8 +811,8 @@ export const BeatStudio = () => {
         <section className="sequencer-surface">
           <div className="section-heading">
             <div>
-              <p>16-STEP SOUNDSCAPE SEQUENCER</p>
-              <h2>Build an atmospheric loop with rhythmic warmth.</h2>
+              <p>THE RHYTHM BOARD</p>
+              <h2>Tap the pads to shape your loop.</h2>
             </div>
             <SlidersHorizontal />
           </div>
@@ -839,8 +853,8 @@ export const BeatStudio = () => {
         <section className="mixer-surface">
           <div className="section-heading">
             <div>
-              <p>MIXER CONSOLE</p>
-              <h2>Shape volume, mutes, and solo lines.</h2>
+              <p>SOUND CREATURES</p>
+              <h2>Give each voice its place.</h2>
             </div>
           </div>
 
@@ -909,53 +923,7 @@ export const BeatStudio = () => {
         </section>
       </div>
 
-      {/* Universal Multi-Platform Engine Switcher & Verification Dialog */}
-      <Dialog open={platformDialogOpen} onOpenChange={setPlatformDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-sky-400" />
-              Native Multi-Platform Engine
-            </DialogTitle>
-            <DialogDescription>
-              Native zero-dependency SDK bridge for all 13 major web and app gaming platforms.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Active Platform Card */}
-          <div className="apple-glass-card mt-2">
-            <div className="flex justify-between items-center mb-1">
-              <span>Active Target</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-mono">
-                {platformMeta.sdkName}
-              </span>
-            </div>
-            <b>{platformMeta.name}</b>
-            <p className="text-xs text-muted-foreground mt-1">{platformMeta.description}</p>
-          </div>
-
-          <div className="mt-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Select Platform Target
-            </p>
-            <div className="platform-grid">
-              {SUPPORTED_PLATFORMS.map((platform) => (
-                <button
-                  key={platform.id}
-                  type="button"
-                  onClick={() => handleSelectPlatform(platform.id)}
-                  className={`platform-chip ${activePlatformId === platform.id ? "is-selected" : ""}`}
-                >
-                  <span>{platform.name}</span>
-                  <small>{platform.sdkName}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="mt-4 text-xs text-muted-foreground">This editor has no ads, rewarded content, purchases, or score submission.</p>
-        </DialogContent>
-      </Dialog>
+      <div className="game-hint" aria-hidden="true">SPACE PLAY <span>·</span> 1–6 SOUND PADS <span>·</span> F FULLSCREEN</div>
     </main>
   );
 /*

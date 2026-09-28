@@ -1,20 +1,21 @@
 # Beat Studio
 
-> An Apple-inspired, touch-friendly 16-step soundscape maker with a live WebGL signal visualizer.
+> An interactive rhythm game where you grow a sound garden one beat at a time.
 
-Beat Studio is a calm, expressive place to build a beat, shape it in real time, and save the idea before it disappears. The interface uses layered glass, clear hierarchy, and responsive controls to keep the focus on making music.
+Beat Studio is a touch-first music game and YouTube Playable. Tap the rhythm board to place sounds into a looping world, press play to bring the garden to life, and tune the groove as it moves. The game opens directly into play with a ready-to-edit beat and an animated WebGL scene.
 
-| Build | Shape | Keep |
+| Play | Shape | Collect |
 | :-- | :-- | :-- |
-| Kick, Snare, Hi-Hat, Clap, Bass, and Shaker patterns | BPM, swing, velocity, track level, mute, and solo | Named presets, favorites, share links, and JSON import/export |
+| Tap 16 pads across Kick, Snare, Hi-Hat, Clap, Bass, and Shaker | Tempo, swing, velocity, level, mute, and solo | Named groove presets, favorites, share links, and JSON import/export |
 
 ## Highlights
 
-- **Native WebGL visualizer** — a GPU-rendered signal sculpture responds to the active step, playback state, and velocity.
-- **Designed to start musical** — the sequencer opens with an audible starter groove; tap Play once to unlock browser audio.
-- **Precise control** — use the 16-step grid, rich keyboard shortcuts, responsive mixer, and fluid controls across phone and desktop.
-- **Portable creations** — save presets locally or with the YouTube Playables save adapter, share a beat URL, and import/export JSON.
-- **No monetization** — no ads, rewarded content, purchases, or artificial score mechanics are included.
+- **A game scene, not a landing screen** — jump straight into the Sound Garden, with a live signal arena, compact in-game HUD, and rhythm board.
+- **Native WebGL scene** — GPU-rendered signal art responds to playback, the active step, and velocity.
+- **Immediate play** — the game opens with an audible starter groove; tap Play once to unlock browser audio.
+- **Creative controls** — shape tempo, swing, velocity, and each instrument's level, mute, or solo state.
+- **Keep and share grooves** — save named presets and favorites, share a beat URL, or import/export JSON.
+- **No monetization** — no ads, rewarded content, purchases, or score submission.
 
 ## Keyboard controls
 
@@ -22,15 +23,15 @@ Beat Studio is a calm, expressive place to build a beat, shape it in real time, 
 | :-- | :-- |
 | `Space` | Play / pause |
 | `←` / `→` | Select a step |
-| `1`–`6` | Toggle the selected step on a track |
+| `1`–`6` | Toggle the selected pad for a sound |
 | `M` | Toggle master audio |
 | `F` | Toggle fullscreen |
 
 ## Run locally
 
 ```bash
-git clone https://github.com/Rahul08319/random-soundscape-maker.git
-cd random-soundscape-maker
+git clone https://github.com/Rahul08319/Soundscape-Studio.git
+cd Soundscape-Studio
 npm install
 npm run dev
 ```
@@ -41,12 +42,12 @@ Create the production bundle with:
 npm run build
 ```
 
-## Architecture
+## Game systems
 
 ```text
-src/components/BeatStudio.tsx       Sequencer, Web Audio engine, controls, and presets
-src/components/BeatVisualizer.tsx  Native WebGL live visualizer
-src/lib/platform/                  Host lifecycle, audio, locale, and save adapters
+src/components/BeatStudio.tsx       Rhythm board, sound engine, mixer, and groove saves
+src/components/BeatVisualizer.tsx   Native WebGL Sound Garden scene
+src/lib/platform/                   YouTube Playables lifecycle, audio, locale, and save adapter
 .github/workflows/verify.yml       Deterministic production-build verification
 ```
 
@@ -54,7 +55,7 @@ Built with React, TypeScript, Vite, Tailwind CSS, Web Audio API, and WebGL.
 
 ## YouTube Playables
 
-The YouTube adapter loads before the app bundle, reports first-frame and game readiness, honors host audio and pause/resume signals, uses the host language, and persists the beat with the Playables save API. Local development falls back to `localStorage`.
+The YouTube adapter loads before the app bundle, reports first-frame and game readiness, honors host audio and pause/resume signals, uses the host language, and persists the current groove with the Playables save API. Local development falls back to `localStorage`.
 
 Before a submission, upload a production bundle to the official [YouTube Playables Test Suite](https://developers.google.com/youtube/gaming/playables/test_suite). GitHub Actions installs the locked dependencies and verifies the production build on every push and pull request.
 
