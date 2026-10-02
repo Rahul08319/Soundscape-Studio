@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { BeatVisualizer } from "./BeatVisualizer";
+import { SoundscapeVisualizer } from "./SoundscapeVisualizer";
 import { platformManager } from "@/lib/platform";
 
 const STEPS = 16;
@@ -672,6 +673,17 @@ export const BeatStudio = () => {
             <span className="game-live-status"><i /> {isPlaying ? "PLAYING" : "READY"}</span>
           </div>
         </section>
+
+        {/* Real-time Apple Fluid Harmonic Visualizer */}
+        <div className="apple-visualizer-strip">
+          <SoundscapeVisualizer
+            isPlaying={isPlaying}
+            bpm={bpm}
+            currentStep={currentStep}
+            isAudioEnabled={isAudioEnabled}
+            activeTracksCount={pattern.reduce((acc, row) => acc + (row[currentStep] ? 1 : 0), 0)}
+          />
+        </div>
 
         {/* Playback & Parameters Bar */}
         <section className="studio-console" aria-label="Playback controls">
